@@ -78,6 +78,7 @@
             <p>زمان بازی: <span id="time1">0</span> دقیقه</p>
             <p>هزینه: <span id="cost1">0</span> تومان</p>
             <button onclick="startTimer(1)">شروع</button>
+            <button onclick="pauseTimer(1)">توقف</button>
             <button onclick="resetTimer(1)">ریست</button>
             <p class="start-time" id="startTime1"></p> 
         </div>
@@ -88,6 +89,7 @@
             <p>زمان بازی: <span id="time2">0</span> دقیقه</p>
             <p>هزینه: <span id="cost2">0</span> تومان</p>
             <button onclick="startTimer(2)">شروع</button>
+            <button onclick="pauseTimer(2)">توقف</button>
             <button onclick="resetTimer(2)">ریست</button>
             <p class="start-time" id="startTime2"></p> 
         </div>
@@ -98,6 +100,7 @@
             <p>زمان بازی: <span id="time3">0</span> دقیقه</p>
             <p>هزینه: <span id="cost3">0</span> تومان</p>
             <button onclick="startTimer(3)">شروع</button>
+            <button onclick="pauseTimer(3)">توقف</button>
             <button onclick="resetTimer(3)">ریست</button>
             <p class="start-time" id="startTime3"></p> 
         </div>
@@ -106,13 +109,13 @@
     <script>
         let timers = {};
         let startTimes = {};
+        let pausedTimes = {};
 
         function startTimer(ps4Id) {
             if (!startTimes[ps4Id]) {
                 startTimes[ps4Id] = new Date();
                 timers[ps4Id] = setInterval(() => updateTimer(ps4Id), 1000);
 
-                
                 let startTime = startTimes[ps4Id];
                 let hours = startTime.getHours();
                 let minutes = startTime.getMinutes();
@@ -121,12 +124,26 @@
                 alert(message);
 
                 document.getElementById(`startTime${ps4Id}`).innerText = message;
+            } else if (pausedTimes[ps4Id]) {
+                // اگر تایمر متوقف شده بود، زمان توقف را به زمان شروع اضافه کنید
+                let pauseDuration = new Date() - pausedTimes[ps4Id];
+                startTimes[ps4Id] = new Date(startTimes[ps4Id].getTime() + pauseDuration);
+                pausedTimes[ps4Id] = null;
+                timers[ps4Id] = setInterval(() => updateTimer(ps4Id), 1000);
+            }
+        }
+
+        function pauseTimer(ps4Id) {
+            if (startTimes[ps4Id] && !pausedTimes[ps4Id]) {
+                clearInterval(timers[ps4Id]);
+                pausedTimes[ps4Id] = new Date();
             }
         }
 
         function resetTimer(ps4Id) {
             clearInterval(timers[ps4Id]);
             startTimes[ps4Id] = null;
+            pausedTimes[ps4Id] = null;
             document.getElementById(`time${ps4Id}`).innerText = 0;
             document.getElementById(`cost${ps4Id}`).innerText = 0;
             document.getElementById(`startTime${ps4Id}`).innerText = '';
